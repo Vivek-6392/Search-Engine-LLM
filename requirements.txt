@@ -2,6 +2,7 @@ langchain
 python-dotenv
 ipykernel
 langchain-community
+langchain-core
 pypdf
 bs4
 arxiv
@@ -18,7 +19,8 @@ duckdb
 pandas
 openai
 langchain-groq
-duckduckgo_search==5.3.1b1
+duckduckgo-search>=8.0.0
+curl-cffi>=0.7.0
 pymupdf
 arxiv
 wikipedia
