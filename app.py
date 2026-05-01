@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain.agents import AgentType, initialize_agent
+from langchain_classic.agents import initialize_agent, AgentType
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_community.tools import ArxivQueryRun, DuckDuckGoSearchRun, WikipediaQueryRun
 from langchain_community.utilities import ArxivAPIWrapper, WikipediaAPIWrapper
