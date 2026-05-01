@@ -27,6 +27,7 @@ sentence_transformers>=3.0.0
 huggingface_hub>=0.24.0
 
 # Search
+tavily-python
 duckduckgo-search>=6.0.0
 curl-cffi>=0.7.0
 arxiv>=2.1.0
