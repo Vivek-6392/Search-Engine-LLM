@@ -1,7 +1,8 @@
 import streamlit as st
 from langchain_classic.agents import initialize_agent, AgentType
 from langchain_community.callbacks import StreamlitCallbackHandler
-from langchain_community.tools import ArxivQueryRun, DuckDuckGoSearchRun, WikipediaQueryRun
+from langchain_community.tools import ArxivQueryRun, WikipediaQueryRun
+from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_community.utilities import ArxivAPIWrapper, WikipediaAPIWrapper
 from langchain_groq import ChatGroq
 
@@ -17,21 +18,33 @@ api_key = st.sidebar.text_input(
     value=st.secrets.get("GROQ_API_KEY", ""),
     placeholder="gsk_...",
 )
+tavily_api_key = st.sidebar.text_input(
+    "Tavily API Key",
+    type="password",
+    value=st.secrets.get("TAVILY_API_KEY", ""),
+    placeholder="tvly-...",
+)
 
 # ── Tools (cached — created once per session) ──────────────────────────────────
 @st.cache_resource
-def get_tools():
+def get_tools(tavily_api_key):
     arxiv = ArxivQueryRun(
         api_wrapper=ArxivAPIWrapper(top_k_results=1, doc_content_chars_max=300)
     )
+
     wiki = WikipediaQueryRun(
         api_wrapper=WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=300)
     )
-    search = DuckDuckGoSearchRun(name="Search")
-    return [search, arxiv, wiki]
+
+    tavily = TavilySearchResults(
+        tavily_api_key=tavily_api_key,
+        max_results=3
+    )
+
+    return [tavily, arxiv, wiki]
 
 
-tools = get_tools()
+tools = get_tools(tavily_api_key)
 
 # ── Chat history ───────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
