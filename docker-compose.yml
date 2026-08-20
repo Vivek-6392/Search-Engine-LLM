@@ -10,13 +10,13 @@ services:
     volumes:
       - ./backend:/app
       - ./.env:/app/.env:ro
+    env_file:
+      - .env
+    # These override .env values to ensure correct Docker-internal service URLs
     environment:
-      - APP_ENV=development
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/deepsearch
       - REDIS_URL=redis://redis:6379/0
       - QDRANT_URL=http://qdrant:6333
-    env_file:
-      - .env
     depends_on:
       - postgres
       - redis
@@ -52,10 +52,11 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_ vars must be baked in at build time for Next.js
+        - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     depends_on:
       - backend
 

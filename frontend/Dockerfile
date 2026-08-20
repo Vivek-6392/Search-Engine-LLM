@@ -12,6 +12,11 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Accept build-time arg and expose as env var for Next.js
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -39,7 +44,5 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-# Ensure the frontend can reach the backend
-ENV NEXT_PUBLIC_API_URL="http://localhost:8000/api/v1" 
 
 CMD ["node", "server.js"]
