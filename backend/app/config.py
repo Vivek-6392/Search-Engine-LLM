@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     GROQ_API_KEY: Optional[str] = None
     OLLAMA_BASE_URL: Optional[str] = "http://localhost:11434"
 
+    # Hugging Face (for downloading embedding models)
+    HF_TOKEN: Optional[str] = None
+
     # Search & Tools
     TAVILY_API_KEY: Optional[str] = None
 
