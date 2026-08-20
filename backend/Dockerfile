@@ -26,5 +26,5 @@ RUN pip install --upgrade pip && pip install -e .
 COPY . .
 
 # Run the application
-# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# HF Spaces routes external traffic to port 7860
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}
