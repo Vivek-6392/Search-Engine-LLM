@@ -11,19 +11,11 @@ st.set_page_config(page_title="LangChain Search Chat", page_icon="🔎")
 st.title("🔎 LangChain – Chat with Search")
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
-st.sidebar.title("Settings")
-api_key = st.sidebar.text_input(
-    "Groq API Key",
-    type="password",
-    value=st.secrets.get("GROQ_API_KEY", ""),
-    placeholder="gsk_...",
-)
-tavily_api_key = st.sidebar.text_input(
-    "Tavily API Key",
-    type="password",
-    value=st.secrets.get("TAVILY_API_KEY", ""),
-    placeholder="tvly-...",
-)
+import streamlit as st
+
+# Load API keys securely from Streamlit secrets
+api_key = st.secrets["GROQ_API_KEY"]
+tavily_api_key = st.secrets["TAVILY_API_KEY"]
 
 # ── Tools (cached — created once per session) ──────────────────────────────────
 @st.cache_resource
