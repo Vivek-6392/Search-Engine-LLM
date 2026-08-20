@@ -73,7 +73,7 @@ if prompt:
     # Build LLM (lightweight object — recreated only when key changes)
     llm = ChatGroq(
         groq_api_key=api_key,
-        model_name="llama-3.3-70b-versatile",
+        model_name="qwen/qwen3.6-27b",
         streaming=True,
     )
 
