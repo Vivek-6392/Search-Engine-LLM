@@ -9,6 +9,7 @@ from app.database.models import User, Conversation, Message
 from app.api.auth import get_current_user
 from app.graph.workflow import build_graph
 from app.graph.state import ResearchState
+from app.observability import get_langfuse_handler
 
 router = APIRouter(prefix="/api/v1/chat", tags=["Chat"])
 graph = build_graph()
@@ -44,7 +45,14 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
         "retrieved_chunks": [],
         "retry_count": 0,
     }
-    
+
+    # Build LangGraph run config — attaches Langfuse tracing when keys are set
+    langfuse_handler = get_langfuse_handler(
+        user_id=str(current_user.id),
+        session_id=request.conversation_id,
+    )
+    run_config = {"callbacks": [langfuse_handler]} if langfuse_handler else {}
+
     if request.stream:
         async def event_generator():
             try:
@@ -54,7 +62,7 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
                 final_answer = ""
                 # We use stream instead of astream for simplicity in this implementation,
                 # but in production astream with async agents is preferred.
-                for s in graph.stream(state):
+                for s in graph.stream(state, config=run_config):
                     # Each yield from graph.stream is a dictionary with the node name as key and the state update as value
                     for node_name, state_update in s.items():
                         yield f"data: {json.dumps({'event': 'node_update', 'node': node_name})}\n\n"
@@ -79,7 +87,7 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
         return StreamingResponse(event_generator(), media_type="text/event-stream")
     else:
         # Non-streaming
-        result = graph.invoke(state)
+        result = graph.invoke(state, config=run_config)
         return {
             "answer": result.get("final_answer"),
             "citations": result.get("citations"),
