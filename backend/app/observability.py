@@ -24,7 +24,7 @@ def get_langfuse_handler(
         return None
 
     try:
-        from langfuse.callback import CallbackHandler  # type: ignore[import]
+        from langfuse.langchain import CallbackHandler  # type: ignore[import]
 
         return CallbackHandler(
             secret_key=settings.LANGFUSE_SECRET_KEY,
