@@ -23,11 +23,11 @@ def _ensure_langfuse_initialized() -> bool:
         return False
 
     try:
-        # v4 reads credentials from env vars via OpenTelemetry exporter
         os.environ["LANGFUSE_SECRET_KEY"] = settings.LANGFUSE_SECRET_KEY
         os.environ["LANGFUSE_PUBLIC_KEY"] = settings.LANGFUSE_PUBLIC_KEY
         if settings.LANGFUSE_HOST:
             os.environ["LANGFUSE_HOST"] = settings.LANGFUSE_HOST
+        os.environ["OTEL_SERVICE_NAME"] = "DeepSearchAI"
 
         from langfuse import Langfuse  # type: ignore[import]
 

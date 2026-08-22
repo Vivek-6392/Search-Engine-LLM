@@ -6,7 +6,7 @@ import json
 
 def synthesize_answer(state: ResearchState) -> ResearchState:
     """Synthesizes the final answer using retrieved evidence and generates citations."""
-    llm = get_llm(temperature=0.2)
+    llm = get_llm(temperature=0.2, streaming=True)
     parser = StrOutputParser()
     
     query = state["query"]

@@ -8,6 +8,9 @@ from app.agents.retriever import document_research
 from app.agents.synthesizer import synthesize_answer
 from app.agents.critic import critique_answer
 
+def reject_node(state: ResearchState):
+    return {"final_answer": "I cannot fulfill this request as it appears to violate safety guidelines or attempts to circumvent instructions.", "citations": []}
+
 def router_node(state: ResearchState):
     return route_query(state)
 
@@ -31,6 +34,8 @@ def should_route(state: ResearchState) -> str:
     intent = state.get("intent", "WEB")
     if intent == "SIMPLE":
         return "synthesize"
+    elif intent == "REJECTED":
+        return "reject"
     elif intent == "WEB":
         return "web_research"
     elif intent == "ACADEMIC":
@@ -59,6 +64,7 @@ def build_graph() -> StateGraph:
     workflow.add_node("academic_research", academic_research_node)
     workflow.add_node("document_research", document_research_node)
     workflow.add_node("synthesize", synthesize_node)
+    workflow.add_node("reject", reject_node)
     
     workflow.add_node("critic", critique_answer)
     
@@ -73,7 +79,8 @@ def build_graph() -> StateGraph:
             "web_research": "web_research",
             "academic_research": "academic_research",
             "document_research": "document_research",
-            "plan": "plan"
+            "plan": "plan",
+            "reject": "reject"
         }
     )
     
@@ -92,6 +99,7 @@ def build_graph() -> StateGraph:
     
     # After synthesize, go to critic
     workflow.add_edge("synthesize", "critic")
+    workflow.add_edge("reject", END)
     
     # From critic, conditionally route
     def check_critique(state: ResearchState) -> str:
