@@ -46,6 +46,8 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
         "retry_count": 0,
     }
 
+    from langfuse import propagate_attributes
+    
     # Build LangGraph run config — attaches Langfuse tracing when keys are set
     langfuse_handler = get_langfuse_handler(
         user_id=str(current_user.id),
@@ -62,17 +64,18 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
                 final_answer = ""
                 # We use stream instead of astream for simplicity in this implementation,
                 # but in production astream with async agents is preferred.
-                for s in graph.stream(state, config=run_config):
-                    # Each yield from graph.stream is a dictionary with the node name as key and the state update as value
-                    for node_name, state_update in s.items():
-                        yield f"data: {json.dumps({'event': 'node_update', 'node': node_name})}\n\n"
-                        
-                        if node_name == "synthesize" and "final_answer" in state_update:
-                            final_answer = state_update['final_answer']
-                            yield f"data: {json.dumps({'event': 'final_answer', 'content': final_answer})}\n\n"
+                with propagate_attributes(user_id=str(current_user.id), session_id=request.conversation_id, tags=["langgraph"]):
+                    for s in graph.stream(state, config=run_config):
+                        # Each yield from graph.stream is a dictionary with the node name as key and the state update as value
+                        for node_name, state_update in s.items():
+                            yield f"data: {json.dumps({'event': 'node_update', 'node': node_name})}\n\n"
                             
-                        if node_name == "critic" and "critique" in state_update:
-                            yield f"data: {json.dumps({'event': 'critique', 'content': state_update['critique']})}\n\n"
+                            if node_name == "synthesize" and "final_answer" in state_update:
+                                final_answer = state_update['final_answer']
+                                yield f"data: {json.dumps({'event': 'final_answer', 'content': final_answer})}\n\n"
+                                
+                            if node_name == "critic" and "critique" in state_update:
+                                yield f"data: {json.dumps({'event': 'critique', 'content': state_update['critique']})}\n\n"
                 
                 # 3. Save Assistant Message
                 if final_answer:
@@ -87,7 +90,8 @@ async def chat(request: ChatRequest, current_user: User = Depends(get_current_us
         return StreamingResponse(event_generator(), media_type="text/event-stream")
     else:
         # Non-streaming
-        result = graph.invoke(state, config=run_config)
+        with propagate_attributes(user_id=str(current_user.id), session_id=request.conversation_id, tags=["langgraph"]):
+            result = graph.invoke(state, config=run_config)
         return {
             "answer": result.get("final_answer"),
             "citations": result.get("citations"),
