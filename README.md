@@ -1,6 +1,6 @@
-# DeepSearch AI
+# Search Engine LLM
 
-DeepSearch AI is a production-grade multi-agent research and knowledge engine. It replaces traditional single-agent LLM wrappers with a robust, observable, and stateful LangGraph architecture capable of autonomous query planning, parallel web and academic research, hybrid retrieval, and evidence verification.
+Search Engine LLM is a production-grade multi-agent research and knowledge engine. It replaces traditional single-agent LLM wrappers with a robust, observable, and stateful LangGraph architecture capable of autonomous query planning, parallel web and academic research, hybrid retrieval, and evidence verification.
 
 ## 🌟 Key Features
 
